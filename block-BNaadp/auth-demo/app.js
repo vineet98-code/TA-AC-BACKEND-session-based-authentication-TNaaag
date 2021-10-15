@@ -19,6 +19,14 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Middleware for cookie
+app.use((req, res, next) =>{
+  console.log(req.cookies);
+  // res.cookie('name', 'Vineet')
+  next()
+})
+
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
