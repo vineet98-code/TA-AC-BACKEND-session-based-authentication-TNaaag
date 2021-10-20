@@ -387,3 +387,8 @@ main {
   background-color: #ec6ead;
   margin: 1rem;
 }
+.error{
+  color: red;
+  font-size: 30px;
+  margin-right: 260px;
+}
