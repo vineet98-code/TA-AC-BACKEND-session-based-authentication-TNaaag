@@ -3,8 +3,9 @@ var router = express.Router();
 
 var User = require('../models/User');
 
-
+// Get users listings 
 router.get('/', function(req, res, next) {
+  console.log(req.session);
   res.render('users');
 });
 
@@ -30,12 +31,15 @@ router.post('/register', function(req, res, next) {
 
 
 router.get('/login', function(req, res, next) {
-  res.render('login');
+  var error = req.flash('error')[0];
+  console.log(error);
+  res.render('login', { error });
 });
 
 router.post('/login', function(req, res, next) {
   var { email, password } = req.body;
   if(!email || !password){
+    req.flash('error', 'Email/Password is Required');
     return res.redirect('/users/login');
   }
   User.findOne({ email }, (err, user) => {
@@ -45,24 +49,24 @@ router.post('/login', function(req, res, next) {
       //  if user is not there we do not want to reach verify password i.e use return
        return res.redirect('/users/login');
      } 
-     // if user is not null
-    //  user schema and verify paswword from models
+     // if user is not null and user schema and verify paswword from models
      user.verifyPassword(password, (err, result) => {
       if(err) return next(err);
       if(!result){
         res.redirect('/users/login');
       }
-      // to uniquely identified the user who login creating uniquely session
+      // to uniquely identified the user who login creating uniquely session and persist logged in user information
       req.session.userId = user.id;
-
       res.redirect('/dashboard');
-
-      // login user
-     })
-
+    })
   })
- 
 });
+
+router.get('/logout', (req, res) => {
+  req.session.destroy();
+  res.clearCookies('connect.sid');
+  res.redirect('/users/login');
+})
 
 
 

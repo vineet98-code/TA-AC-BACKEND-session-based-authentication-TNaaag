@@ -7,6 +7,8 @@ var mongoose = require('mongoose');
 
 var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
+var flash = require('connect-flash');
+
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -46,6 +48,8 @@ app.use(session({
   store: new MongoStore({ mongooseConnection: mongoose.connection })
 }))
 
+// setting up of middleware and always be set up after the session middleware
+app.use(flash())
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
