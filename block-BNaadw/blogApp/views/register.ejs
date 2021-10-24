@@ -1,0 +1,24 @@
+<%- include('partials/header') -%>
+
+<section>
+    <div class="container">
+        <form class="form" method="POST" action="/users/register">
+            <h3>Register</h3>
+            <% if(error) { %>
+                <p class="error"><%= error %></p>
+             <% } %>
+          <fieldset>
+            <input name="firstName" type="text" placeholder="FirstName"/>
+            <input name="lastName" type="text" placeholder="LastName"/>
+            <input name="email" placeholder="Email" type="text" />
+            <input name="password" placeholder="Password" type="text" />
+
+            <div>
+              <button class="btn form_btn" type="submit">Register</button>
+            </div>
+          </fieldset>
+        </form>
+    </div>
+  </section>
+    
+<%- include('partials/footer') -%>

@@ -1,0 +1,26 @@
+<%- include('partials/header') -%>
+
+<section class="main_section">
+    <div class="container">
+      <h2 class="event_list">List of Events</h2>
+      <div class="flex">
+        <%- include('partials/sideBar') -%>
+        
+        <section class="events_section flex-70">
+          <div>
+            <% events.forEach(event=> { %>
+            <div class="event_single">
+              <h2 class="title"><%= event.title %></h2>
+              <h3 class="summary about_p"><%= event.summary %></h3>
+              <a href="/events/<%= event.id  %> ">
+                <button class="btn view_event_btn">View Event</button>
+              </a>
+            </div>
+            <% }) %>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+<%- include('partials/footer') -%>
