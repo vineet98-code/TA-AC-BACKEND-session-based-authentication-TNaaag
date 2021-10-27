@@ -9,7 +9,6 @@ router.get('/', function(req, res, next) {
   res.render('users');
 });
 
-
 // create user
 router.post('/register', (req, res, next) => {
   User.create(req.body, (err, createUser) => { // user.create going to invoked same hooks internally by mongo
@@ -49,6 +48,7 @@ router.post('/login', function(req, res, next) {
     console.log(req.body, user);
      if(err) return next(err);
      if(!user){
+      req.flash('error', 'This email is not registered');
       //  if user is not there we do not want to reach verify password i.e use return
        return res.redirect('/users/login');
      } 
@@ -60,17 +60,15 @@ router.post('/login', function(req, res, next) {
       }
       // to uniquely identified the user who login creating uniquely session and persist logged in user information
       req.session.userId = user.id;
-      res.redirect('/dashboard');
+      res.redirect('/articles/new');
     })
   })
 });
 
 router.get('/logout', (req, res) => {
   req.session.destroy();
-  res.clearCookies('connect.sid');
+  res.clearCookie('connect.sid');
   res.redirect('/users/login');
 })
-
-
 
 module.exports = router;
