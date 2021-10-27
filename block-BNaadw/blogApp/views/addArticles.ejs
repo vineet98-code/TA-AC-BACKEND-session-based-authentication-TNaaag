@@ -1,0 +1,22 @@
+<%- include('partials/header') -%>
+
+<section>
+    <div class="container">
+        <form class="form" method="POST" action="/articles">
+          <fieldset>
+            <input name="title" placeholder="title" type="text" />
+            <textarea name="description" type = "text" placeholder="Enter description" cols="20" rows="10"></textarea>
+            <input name="tags" placeholder="Tags" type="text" />
+            <!-- <input name="start_date" placeholder="start_date" type="date" />
+            <input name="end_date" placeholder="end_date" type="date" /> -->
+            <!-- <input name="event_category" placeholder="event_category" type="text" /> -->
+            <!-- <input name="location" placeholder="location" type="text" /> -->
+            <div>
+              <button class="btn form_btn" type="submit">Add Articles</button>
+            </div>
+          </fieldset>
+        </form>
+    </div>
+  </section>
+    
+<%- include('partials/footer') -%>
