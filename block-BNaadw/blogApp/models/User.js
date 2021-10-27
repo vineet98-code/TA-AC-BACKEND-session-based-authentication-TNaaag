@@ -5,11 +5,9 @@ var bcrypt = require('bcrypt');
 
 
 var userSchema = new Schema({
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
+    name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, minlength: 5, required: true },
-    city: { type: String }
     
   },{ timestamps: true }
 );
@@ -24,7 +22,7 @@ userSchema.pre('save', function(next) {
       // second argument takes a salt round, it basically a random string(secret) which is used to hash the password
       if (err) return next(err);
       this.password = hashed;
-      console.log(this, 'after hashing');
+      // console.log(this, 'after hashing');
       next();
     }); 
   } else {

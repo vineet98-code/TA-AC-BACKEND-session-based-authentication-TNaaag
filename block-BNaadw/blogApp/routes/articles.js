@@ -1,98 +1,121 @@
 var express = require('express');
 var router = express.Router();
 
-var Event = require('../models/article');
+var Article = require('../models/article');
 var Remark = require('../models/remark');
 var User = require('../models/User');
 
+// to protect all the routes other than list of articles amd article details page
+var auth = require('../middleware/auth');
 
 
 
+// list articles
+router.get('/', (req, res) =>{
+  Article.find({}, (err, articles) => {
+    Article.distinct("event_category", (err, allCategories) =>{
+      if (err) return next(err);
+      console.log(err, allCategories);
+      Article.distinct("location", (err, allLocations) =>{
+        if (err) return next(err);
+        console.log(err, allLocations);
+        res.render('articles', {articles:articles, allCategories: allCategories, allLocations: allLocations });
+      });
+  });
+
+  })
+})
 
 // For rendering article and create form => GET on "/books/new"
-router.get('/new', (req, res, next) => {
-    res.render('addEvent');
+router.get('/new', auth.loggedInUser, (req, res, next) => {
+    res.render('addArticles');
 });
-
-// send data
-router.post('/', (req, res, next) => {
-  Event.create(req.body, (err, createEvent) => {
-    if (err) return next(err);
-    res.redirect('/events');
-  });
-});
-
 
 // Fetch Single event
 router.get('/:id', (req, res, next) => {
-    var id = req.params.id;
-    Event.findById(id).populate('remark').exec((err, event) => {
-        console.log(event);
-        
-    res.render('singleEvents', { event: event })
-   });
+  var id = req.params.id;
+  Article.findById(id).populate('remark').populate('author', 'name email').exec((err, article) => {
+      console.log(article);
+      res.render('singleArticle', { article: article })
+    });
 });
 
-// Edit event operation
-router.get('/:id/edit', function (req, res, next) {
-  var id = req.params.id;
-  Event.findById(id, (err, event) => {
+// This is protected route pluging before the handling all endpoints
+router.use(auth.loggedInUser);
+
+
+// send data and create article
+router.post('/', (req, res, next) => {
+  req.body.tags = req.body.tags.trim().split(" ");
+  req.body.author = req.user.id; // this is going to extract the current id from the user and put it on the author field indide the req.body
+  Article.create(req.body, (err, article) => {
     if (err) return next(err);
-    res.render('eventEditForm', { event: event });
+    res.redirect('/articles');
   });
 });
 
-// Delete Event operation
+
+// Edit articles form 
+router.get('/:id/edit', function (req, res, next) {
+  var id = req.params.id;
+  Article.findById(id, (err, article) => {
+    if (err) return next(err);
+    res.render('editArticlesForm', { article: article });
+  });
+});
+
+// Delete Articles operation
 router.get('/:id/delete', (req, res, next) => {
     var id = req.params.id;
-    Event.findByIdAndDelete(id, (err, events) => {
+    // check whether the current logged in user 1 matches with the author of the article
+    
+    Article.findByIdAndDelete(id, (err, article) => {
       if (err) return next(err);
-      Event.findByIdAndUpdate(events.authorId, { $pull: { booksId: events._id }},
-            (err, author) => {
-                res.redirect('/events/');
-            }
-        );
+      Article.findByIdAndUpdate(article.articleId, { $pull: { booksId: article._id }},
+        (err, author) => {
+            res.redirect('/articles/');
+        });
     });
 });
  
-
+// Update Articles 
 router.post('/:id', (req, res, next) => {
   var id = req.params.id;
-  Event.findByIdAndUpdate(id, req.body, (err, updateEvent) => {
+  Article.findByIdAndUpdate(id, req.body, (err, updateArticle) => {
     if (err) return next(err);
-    res.redirect('/events/' + id);
+    res.redirect('/articles/' + id);
   });
 });
 
 // increment likes
 router.get('/:id/likes', (req, res, next) => {
     var id = req.params.id;
-     Event.findByIdAndUpdate(id, { $inc: { likes: 1 } }, (err, article) => {
+    Article.findByIdAndUpdate(id, { $inc: { likes: 1 } }, (err, article) => {
       if (err) return next(err);
-      res.redirect('/events/' + id);
+      res.redirect('/articles/' + id);
     });
   });
 
 //  increment dislikes
 router.get('/:id/dislikes', (req, res, next) => {
     var id = req.params.id;
-    Event.findByIdAndUpdate(id, { $inc: { likes: -1 } }, (err, article) => {
+    Article.findByIdAndUpdate(id, { $inc: { likes: -1 } }, (err, article) => {
         if (err) return next(err);
-        res.redirect('/events/' + id);
+        res.redirect('/articles/' + id);
     });  
 });
 
 // Remarks send
-router.post('/:eventId/remark', (req, res, next) => {
+router.post('/:articleId/remark', (req, res, next) => {
 
-  var eventId = req.params.eventId;
+  var articleId = req.params.articleId;
   console.log(req.body);
-  req.body.eventId = eventId;
+  req.body.articleId = articleId;
   Remark.create(req.body, (err, remark) => { //newly created remark
     if (err) return next(err);
-    Event.findByIdAndUpdate(eventId, { $push: { remark: remark.id }}, (err, updatedEvent) => {
+    Article.findByIdAndUpdate(articleId, { $push: { remark: remark.id }}, (err, updatedEvent) => {
         if (err) return next(err);
-        res.redirect('/events/' + eventId);
+        res.redirect('/articles/' + articleId);
       });
     });
 });
